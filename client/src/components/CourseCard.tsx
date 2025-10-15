@@ -4,19 +4,26 @@ import { useState } from "react";
 import { GiSparkles } from "react-icons/gi";
 import { PiLayout } from "react-icons/pi";
 import { CgShoppingCart } from "react-icons/cg";
-
-export default function CourseCard({
-  course,
-  onEdit,
-}: {
-  course: Course;
-  onEdit?: () => void;
-}) {
+import { useAuth } from "../context/useAuth";
+import { checkoutService } from "../services/purchaseService";
+import { toast } from "react-hot-toast";
+export default function CourseCard({ course }: { course: Course }) {
+  const { user, loading } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
   const handleWatchClick = () => {
     navigate(`/courses/${course.url}`);
   };
+  const handleBuyCourse = async () => {
+    if (!user) return;
+    try {
+      await checkoutService.startCourseChechoutSession(course.id);
+    } catch (error: any) {
+      console.error(error.message);
+      toast.error("Checkout failed");
+    }
+  };
+  if (loading) return;
   return (
     <div
       className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
@@ -65,10 +72,16 @@ export default function CourseCard({
             <PiLayout className="w-4 h-4" />
             Watch
           </button>
-          <button className="flex-1 flex hover:cursor-pointer items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-indigo-600 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-all duration-300 transform hover:scale-105">
-            <CgShoppingCart className="w-4 h-4" />
-            Buy
-          </button>
+
+          {user && (
+            <button
+              onClick={handleBuyCourse}
+              className="flex-1 flex hover:cursor-pointer items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-indigo-600 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-all duration-300 transform hover:scale-105"
+            >
+              <CgShoppingCart className="w-4 h-4" />
+              Buy ${course.price}
+            </button>
+          )}
         </div>
       </div>
 

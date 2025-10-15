@@ -22,7 +22,6 @@ export default function HomePage() {
   const subscribeToPlan = async () => {
     setProcessingOngoing(true);
     try {
-      // implement subscription logic here
       console.log("Subscribed!");
     } finally {
       setProcessingOngoing(false);

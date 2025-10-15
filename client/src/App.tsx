@@ -6,6 +6,7 @@ import AboutPage from "./pages/AboutPage";
 import LoginPage from "./pages/LoginPage";
 import CoursePage from "./pages/CoursePage";
 import CheckoutPage from "./pages/CheckoutPage";
+import { Toaster } from "react-hot-toast";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +28,7 @@ function App() {
           <Route path="/stripe-checkout" element={<CheckoutPage />} />
         </Routes>
       </BrowserRouter>
+      <Toaster position="top-right" />
     </QueryClientProvider>
   );
 }
