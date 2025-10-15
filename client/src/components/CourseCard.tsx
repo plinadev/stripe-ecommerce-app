@@ -8,22 +8,33 @@ import { useAuth } from "../context/useAuth";
 import { checkoutService } from "../services/purchaseService";
 import { toast } from "react-hot-toast";
 export default function CourseCard({ course }: { course: Course }) {
-  const { user, loading } = useAuth();
+  const { user, loading: fetchingUser } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const handleWatchClick = () => {
     navigate(`/courses/${course.url}`);
   };
   const handleBuyCourse = async () => {
     if (!user) return;
+    setLoading(true);
     try {
-      await checkoutService.startCourseChechoutSession(course.id);
+      const { url } = await checkoutService.startCourseChechoutSession(
+        course.id
+      );
+      if (url) {
+        window.location.href = url;
+      } else {
+        toast.error("Checkout URL not available");
+      }
     } catch (error: any) {
       console.error(error.message);
       toast.error("Checkout failed");
+    } finally {
+      setLoading(false);
     }
   };
-  if (loading) return;
+  if (fetchingUser) return;
   return (
     <div
       className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
@@ -67,6 +78,7 @@ export default function CourseCard({ course }: { course: Course }) {
         <div className="flex gap-3 ">
           <button
             onClick={handleWatchClick}
+            disabled={loading}
             className="flex-1 hover:cursor-pointer flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold shadow-md hover:shadow-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
           >
             <PiLayout className="w-4 h-4" />
@@ -76,6 +88,7 @@ export default function CourseCard({ course }: { course: Course }) {
           {user && (
             <button
               onClick={handleBuyCourse}
+              disabled={loading}
               className="flex-1 flex hover:cursor-pointer items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-indigo-600 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-all duration-300 transform hover:scale-105"
             >
               <CgShoppingCart className="w-4 h-4" />
