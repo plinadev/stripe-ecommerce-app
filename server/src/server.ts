@@ -2,13 +2,17 @@ import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import checkoutRoutes from "./routes/checkout.routes";
+import stripeWebhooksRoutes from "./routes/stripe-webhooks.routes";
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || "3001";
 
-app.use(express.json());
 app.use(cors({ origin: "*" }));
+
+app.use(stripeWebhooksRoutes);
+
+app.use(express.json());
 
 app.use("/api", checkoutRoutes);
 
