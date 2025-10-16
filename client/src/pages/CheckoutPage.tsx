@@ -14,9 +14,10 @@ function CheckoutPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const result = params.get("purchaseResult");
-    const purchaseSessionId = params.get("ongiongPurchaseSessionId");
+    const purchaseSessionId = params.get("ongoingPurchaseSessionId");
     setPurchaseResult(result);
 
+    console.log(result);
     if (result === "success" && purchaseSessionId) {
       checkoutService
         .waitForPurchaseCompleted(purchaseSessionId)

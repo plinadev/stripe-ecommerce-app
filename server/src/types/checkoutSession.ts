@@ -3,6 +3,7 @@ import { Timestamp } from "firebase-admin/firestore";
 export type CheckoutSessionData = {
   status: "ongoing" | "failure" | "completed";
   created: Timestamp;
-  courseId: string;
+  courseId?: string;
+  subscriptionId?: string;
   userId: string;
 };

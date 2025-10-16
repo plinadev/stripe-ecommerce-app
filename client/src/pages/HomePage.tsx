@@ -3,9 +3,13 @@ import CoursesCardList from "../components/CourseCardList";
 import Layout from "../components/Layout";
 import { useCourses } from "../hooks/useCourses";
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { useAuth } from "../context/useAuth";
+import { checkoutService } from "../services/purchaseService";
 
 export default function HomePage() {
   const { courses } = useCourses();
+  const { user, loading: fetchingUser } = useAuth();
   const [activeTab, setActiveTab] = useState<"beginners" | "advanced">(
     "beginners"
   );
@@ -20,14 +24,25 @@ export default function HomePage() {
   );
 
   const subscribeToPlan = async () => {
+    if (!user) return;
     setProcessingOngoing(true);
     try {
-      console.log("Subscribed!");
+      const { url } = await checkoutService.startSubscriptionCheckoutSession(
+        import.meta.env.VITE_STRIPE_SUBSCRIPTION_ID
+      );
+      if (url) {
+        window.location.href = url;
+      } else {
+        toast.error("Checkout URL not available");
+      }
+    } catch (error: any) {
+      console.error(error.message);
+      toast.error("Checkout failed");
     } finally {
       setProcessingOngoing(false);
     }
   };
-
+  if (fetchingUser) return;
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

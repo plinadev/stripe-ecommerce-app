@@ -3,6 +3,7 @@ import { db } from "../config/firebase.config";
 import { stripe } from "../config/stripe.config";
 import { CheckoutSessionData, Course } from "../types";
 import Stripe from "stripe";
+import { fulfillSubscriptionPurchase } from "./subscription.service";
 
 export const createCheckoutSession = async (
   courseId: string,
@@ -57,7 +58,7 @@ export const createCheckoutSession = async (
       },
     ],
     mode: "payment",
-    success_url: `${process.env.CLIENT_URL}/stripe-checkout?purchaseResult=success&ongiongPurchaseSessionId=${purchaseSession.id}`,
+    success_url: `${process.env.CLIENT_URL}/stripe-checkout?purchaseResult=success&ongoingPurchaseSessionId=${purchaseSession.id}`,
     cancel_url: `${process.env.CLIENT_URL}/stripe-checkout?purchaseResult=failure`,
     client_reference_id: purchaseSession.id,
 
@@ -79,13 +80,20 @@ export const onCheckoutSessionCompleted = async (
     .doc(purchaseSessionId);
 
   const purchaseSessionSnap = await purchaseSessionRef.get();
-  const { userId, courseId } =
+  const { userId, courseId, subscriptionId } =
     purchaseSessionSnap.data() as CheckoutSessionData;
+  const customerId = session.customer as string | null;
   if (courseId) {
-    const customerId = session.customer as string | null;
     await fulfillCoursePurchase(
       userId,
       courseId,
+      purchaseSessionId,
+      customerId
+    );
+  } else if (subscriptionId) {
+    await fulfillSubscriptionPurchase(
+      userId,
+      subscriptionId,
       purchaseSessionId,
       customerId
     );

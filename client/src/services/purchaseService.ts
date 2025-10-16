@@ -6,6 +6,20 @@ interface CheckoutResponse {
   stripeCheckoutSessionId: string;
 }
 export const checkoutService = {
+  startSubscriptionCheckoutSession: async (productId: string) => {
+    try {
+      const response = await apiClient.post("api/subscribe", {
+        productId,
+      });
+      return response.data as CheckoutResponse;
+    } catch (error: any) {
+      console.error(
+        "Error starting checkout session",
+        error.response?.data || error.message
+      );
+      throw error;
+    }
+  },
   startCourseChechoutSession: async (courseId: string) => {
     try {
       const response = await apiClient.post("api/checkout", {
